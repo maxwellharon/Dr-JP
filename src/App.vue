@@ -11,26 +11,10 @@
         <component :is="Component" />
       </Transition>
     </router-view>
-
-    <div v-if="seeding" class="fixed bottom-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-      Seeding master data...
-    </div>
   </div>
 </template>
 
 <script setup>
-import { watch } from 'vue'
 import { useAuth } from './stores/auth'
-import { useMasterData } from './composables/useMasterData'
-
-const { user, loading } = useAuth()
-const { seedAllIfNeeded, loading: seeding } = useMasterData()
-
-watch(user, async (newUser) => {
-  if (newUser) {
-    console.log('🔄 Starting seed...')
-    await seedAllIfNeeded()
-    console.log('✅ Seed completed')
-  }
-}, { immediate: true })
+const { loading } = useAuth()
 </script>

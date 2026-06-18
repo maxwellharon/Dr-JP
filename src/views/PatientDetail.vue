@@ -52,11 +52,11 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useFirestore } from '../composables/useFirestore'
+import { useWixData } from '../composables/useWixData'
 import NavBar from '../components/NavBar.vue'
 
 const route = useRoute()
-const { patients } = useFirestore()
+const { patients } = useWixData()
 const patient = computed(() => patients.value.find(p => p.id === route.params.id) || null)
 
 const formatPrice = (price) => {

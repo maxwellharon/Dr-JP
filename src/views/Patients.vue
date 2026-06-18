@@ -25,31 +25,48 @@
       <button @click="clearFilters" class="bg-gray-200 px-5 rounded-xl hover:bg-gray-300 transition">Clear</button>
     </div>
 
-    <!-- Table / Card view -->
-    <ResponsiveTable :headers="headers" :data="paginatedPatients" :actions="true" @view="goToPatient" @delete="deletePatient" />
-
-    <!-- Pagination -->
-    <div class="mt-6">
-      <Pagination :current-page="currentPage" :total-pages="totalPages" @page-change="page => currentPage = page" />
+    <!-- Loading state -->
+    <div v-if="loading" class="flex justify-center py-10">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
     </div>
+
+    <!-- Table / Card view -->
+    <template v-else>
+      <ResponsiveTable 
+        :headers="headers" 
+        :data="paginatedPatients" 
+        :actions="true" 
+        @view="goToPatient" 
+        @delete="handleDelete" 
+      />
+
+      <!-- Pagination -->
+      <div class="mt-6">
+        <Pagination 
+          :current-page="currentPage" 
+          :total-pages="totalPages" 
+          @page-change="page => currentPage = page" 
+        />
+      </div>
+    </template>
   </div>
 
   <Teleport to="body">
-    <UploadModal v-if="showUpload" @close="showUpload = false" @uploaded="showUpload = false" />
+    <UploadModal v-if="showUpload" @close="showUpload = false" @uploaded="onUploaded" />
   </Teleport>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useFirestore } from '../composables/useFirestore'
+import { useWixData } from '../composables/useWixData'
 import NavBar from '../components/NavBar.vue'
 import ResponsiveTable from '../components/ResponsiveTable.vue'
 import Pagination from '../components/Pagination.vue'
 import UploadModal from '../components/UploadModal.vue'
 
 const router = useRouter()
-const { patients, deletePatient } = useFirestore()
+const { patients, loading, deletePatient } = useWixData()
 
 const search = ref('')
 const procFilter = ref('')
@@ -75,7 +92,6 @@ const filteredPatients = computed(() => {
 })
 
 const totalPages = computed(() => Math.ceil(filteredPatients.value.length / pageSize) || 1)
-
 const paginatedPatients = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   return filteredPatients.value.slice(start, start + pageSize)
@@ -91,5 +107,20 @@ const headers = ['Name', 'Procedure', 'Age', 'Phone', 'Price (KES)']
 
 const goToPatient = (patient) => {
   router.push(`/patients/${patient.id}`)
+}
+
+const handleDelete = async (id) => {
+  if (confirm('Are you sure you want to delete this patient?')) {
+    try {
+      await deletePatient(id)
+    } catch (e) {
+      alert('Delete failed: ' + e.message)
+    }
+  }
+}
+
+const onUploaded = () => {
+  showUpload.value = false
+  // Data is refreshed inside UploadModal via bulkUpload
 }
 </script>

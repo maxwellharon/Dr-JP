@@ -17,9 +17,9 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useFirestore } from '../composables/useFirestore'
+import { useWixData } from '../composables/useWixData'
 
-const { bulkUpload } = useFirestore()
+const { bulkUpload } = useWixData()
 const emit = defineEmits(['close', 'uploaded'])
 const status = ref('')
 
@@ -47,7 +47,7 @@ const handleFile = async (e) => {
         return obj
       })
     }
-    if (records.length) await bulkUpload(records, 'patients')
+    if (records.length) await bulkUpload(records)
     status.value = `✅ Imported ${records.length} records`
     setTimeout(() => { emit('close'); emit('uploaded') }, 1500)
   } catch (err) { status.value = `❌ Error: ${err.message}` }
@@ -59,9 +59,11 @@ const seedSample = async () => {
     { name: 'Jane Smith', age: 28, selectedProcedure: 'Botox', isNonSurgical: true, calculatedPrice: 800, Country: 'USA', email: 'jane@example.com', bmi: 22 },
     { name: 'Michael Ogalo', age: 45, selectedProcedure: 'Rhinoplasty', isNonSurgical: false, calculatedPrice: 6200, Country: 'Kenya', email: 'michael@example.com', bmi: 26 }
   ]
-  await bulkUpload(sample, 'patients')
-  status.value = '✅ Added 3 sample patients'
-  setTimeout(() => { emit('close'); emit('uploaded') }, 1500)
+  try {
+    await bulkUpload(sample)
+    status.value = '✅ Added 3 sample patients'
+    setTimeout(() => { emit('close'); emit('uploaded') }, 1500)
+  } catch (err) { status.value = `❌ Error: ${err.message}` }
 }
 </script>
 

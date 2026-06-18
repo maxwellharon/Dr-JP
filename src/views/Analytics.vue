@@ -28,11 +28,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useFirestore } from '../composables/useFirestore'
+import { useWixData } from '../composables/useWixData'
 import NavBar from '../components/NavBar.vue'
 
-const { patients } = useFirestore()
-const loading = ref(false)
+const { patients, loading } = useWixData()
 const insights = ref([])
 
 const generateInsights = () => {
@@ -69,11 +68,7 @@ const generateInsights = () => {
 }
 
 const refreshInsights = () => {
-  loading.value = true
-  setTimeout(() => {
-    generateInsights()
-    loading.value = false
-  }, 300)
+  generateInsights()
 }
 
 generateInsights()
