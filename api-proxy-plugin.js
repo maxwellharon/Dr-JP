@@ -6,7 +6,7 @@ export default function apiProxyPlugin() {
         name: 'api-proxy',
         configureServer(server) {
             const env = loadEnv('development', process.cwd(), '')
-            console.log('🔧 API Proxy Ready - Site ID only')
+            console.log('🔧 Wix Proxy Ready')
 
             server.middlewares.use(async (req, res, next) => {
                 if (!req.url.startsWith('/api/wix-data')) return next()
@@ -35,8 +35,6 @@ export default function apiProxyPlugin() {
 
                     const response = await fetch(wixUrl, options)
                     const bodyText = await response.text()
-
-                    console.log(`← Wix ${collection || 'list'}: ${response.status}`)
 
                     res.statusCode = response.status
                     res.setHeader('Content-Type', 'application/json')

@@ -23,19 +23,17 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="inq in paginatedInquiries" :key="inq.id" class="border-b hover:bg-slate-50 transition">
+            <tr v-for="inq in paginatedInquiries" :key="inq.id" class="border-b hover:bg-slate-50">
               <td class="px-5 py-3">{{ formatDate(inq.createdDate) }}</td>
               <td class="px-5 py-3">{{ inq.email }}</td>
               <td class="px-5 py-3 font-medium">{{ inq.subject }}</td>
-              <td class="px-5 py-3 text-sm text-gray-600">{{ inq.message || '—' }}</td>
+              <td class="px-5 py-3 text-sm text-gray-600 line-clamp-2">{{ inq.message }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div v-if="inquiries.length > 0" class="mt-6">
-        <Pagination :current-page="currentPage" :total-pages="totalPages" @page-change="page => currentPage = page" />
-      </div>
+      <Pagination v-if="inquiries.length" :current-page="currentPage" :total-pages="totalPages" @page-change="p => currentPage = p" class="mt-6" />
     </template>
   </div>
 </template>
@@ -47,20 +45,11 @@ import NavBar from '../components/NavBar.vue'
 import Pagination from '../components/Pagination.vue'
 
 const { inquiries, loading } = useWixData()
-
 const currentPage = ref(1)
-const pageSize = 8
+const pageSize = 10
 
 const totalPages = computed(() => Math.ceil(inquiries.value.length / pageSize) || 1)
-const paginatedInquiries = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return inquiries.value.slice(start, start + pageSize)
-})
+const paginatedInquiries = computed(() => inquiries.value.slice((currentPage.value-1)*pageSize, currentPage.value*pageSize))
 
-const formatDate = (isoString) => {
-  if (!isoString) return '—'
-  return new Date(isoString).toLocaleDateString('en-KE', {
-    year: 'numeric', month: 'short', day: 'numeric'
-  })
-}
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-KE', { year:'numeric', month:'short', day:'numeric' }) : '—'
 </script>

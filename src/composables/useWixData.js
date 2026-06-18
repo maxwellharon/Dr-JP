@@ -7,23 +7,20 @@ const loading = ref(false)
 const error = ref(null)
 
 const COLLECTIONS = {
-    patients: 'QuoteSubmissions',           // ✅ Working (50 records)
-    inquiries: 'Send us a message and we’ll get back to you shortly.', // Try this first
-    // inquiries: 'Send us a message and we’ll get back to you shortly. 2', // Alternative
+    patients: 'QuoteSubmissions',
+    inquiries: 'contact12',           // ← Confirmed from your list
     procedures: 'Procedures'
 }
 
 async function fetchCollection(collectionKey) {
     const wixId = COLLECTIONS[collectionKey]
-    console.log(`Fetching: ${collectionKey} → "${wixId}"`)
+    console.log(`Fetching: ${collectionKey} → ${wixId}`)
 
     const res = await fetch(`/api/wix-data?collection=${encodeURIComponent(wixId)}`)
-
     if (!res.ok) {
-        console.error(`❌ Failed ${collectionKey}: HTTP ${res.status}`)
-        return [] // Don't crash the whole app
+        console.error(`Failed ${collectionKey}: ${res.status}`)
+        return []
     }
-
     const json = await res.json()
     return json.dataItems || json.items || []
 }
@@ -31,16 +28,26 @@ async function fetchCollection(collectionKey) {
 function mapPatient(item) {
     return {
         id: item._id,
-        name: item.name || item.fullName || item.title || 'Unknown',
+        name: item.name || item.fullName || item.title || '',
         email: item.email || '',
         phone: item.phone || '',
         age: Number(item.age) || null,
         Country: item.Country || item.country || 'Kenya',
-        selectedProcedure: item.selectedProcedure || item.procedure || 'Consultation',
+        selectedProcedure: item.selectedProcedure || item.procedure || '',
         isNonSurgical: Boolean(item.isNonSurgical),
         bmi: Number(item.bmi) || null,
         calculatedPrice: Number(item.calculatedPrice || item.price) || 0,
         createdDate: item._createdDate || item.createdDate
+    }
+}
+
+function mapInquiry(item) {
+    return {
+        id: item._id,
+        email: item.email || '',
+        subject: item.subject || '',
+        message: item.yourMessage || item.message || '',
+        createdDate: item.submissionTime || item._createdDate
     }
 }
 
@@ -54,10 +61,10 @@ async function loadAll() {
         ])
 
         patients.value = rawPatients.map(mapPatient)
-        inquiries.value = rawInquiries
+        inquiries.value = rawInquiries.map(mapInquiry)
         procedures.value = rawProcedures
 
-        console.log(`✅ Real Data Loaded | Patients: ${patients.value.length} | Inquiries: ${inquiries.value.length}`)
+        console.log(`✅ REAL DATA LOADED | Patients: ${patients.value.length} | Inquiries: ${inquiries.value.length}`)
     } catch (e) {
         console.error('Load error:', e)
     } finally {
