@@ -13,7 +13,6 @@ export default function apiProxyPlugin() {
 
                 const url = new URL(req.url, `http://${req.headers.host}`)
                 const collection = url.searchParams.get('collection')
-                const action = url.searchParams.get('action')
 
                 const headers = {
                     'Content-Type': 'application/json',
@@ -22,20 +21,21 @@ export default function apiProxyPlugin() {
                 }
 
                 try {
-                    let wixUrl, options = { headers }
+                    // Force the Wix REST API query engine to lift its default 50-item threshold
+                    const response = await fetch('https://www.wixapis.com/wix-data/v1/items/query', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            dataCollectionId: collection,
+                            query: {
+                                paging: {
+                                    limit: 1000
+                                }
+                            }
+                        })
+                    })
 
-                    if (action === 'list') {
-                        wixUrl = 'https://www.wixapis.com/wix-data/v2/collections'
-                        options.method = 'GET'
-                    } else if (collection) {
-                        wixUrl = 'https://www.wixapis.com/wix-data/v1/items/query'
-                        options.method = 'POST'
-                        options.body = JSON.stringify({ dataCollectionId: collection })
-                    }
-
-                    const response = await fetch(wixUrl, options)
                     const bodyText = await response.text()
-
                     res.statusCode = response.status
                     res.setHeader('Content-Type', 'application/json')
                     res.end(bodyText)

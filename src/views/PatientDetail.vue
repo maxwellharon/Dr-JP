@@ -1,10 +1,10 @@
 <template>
-  <NavBar />
-  <div class="p-4 md:p-6 max-w-5xl mx-auto">
-    <router-link to="/patients" class="text-indigo-600 hover:underline inline-flex items-center gap-1 mb-4">
-      <i class="fas fa-arrow-left"></i> Back to Patients
-    </router-link>
-    <Transition name="fade" appear>
+  <div>
+    <NavBar />
+    <div class="p-4 md:p-6 max-w-5xl mx-auto">
+      <router-link to="/patients" class="text-indigo-600 hover:underline inline-flex items-center gap-1 mb-4">
+        <i class="fas fa-arrow-left"></i> Back to Patients
+      </router-link>
       <div v-if="patient" class="bg-white rounded-2xl shadow-md overflow-hidden">
         <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-8 text-white">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -40,12 +40,12 @@
           </div>
           <div class="md:col-span-2 bg-indigo-50 rounded-xl p-5 shadow-sm">
             <h3 class="font-bold text-lg mb-2"><i class="fas fa-lightbulb mr-2"></i>Smart Insight</h3>
-            <p class="text-slate-700">Based on similar patients, {{ patient.name }} might benefit from a follow‑up consultation in 3–6 months. Patients who had {{ patient.selectedProcedure }} reported high satisfaction with our post‑op care.</p>
+            <p class="text-slate-700">Based on similar patients, {{ patient.name }} might benefit from a follow‑up consultation in 3–6 months.</p>
           </div>
         </div>
       </div>
       <div v-else class="bg-white rounded-2xl shadow p-8 text-center text-slate-500">Patient not found.</div>
-    </Transition>
+    </div>
   </div>
 </template>
 
@@ -59,18 +59,6 @@ const route = useRoute()
 const { patients } = useWixData()
 const patient = computed(() => patients.value.find(p => p.id === route.params.id) || null)
 
-const formatPrice = (price) => {
-  if (!price) return '—'
-  return new Intl.NumberFormat('en-KE').format(price)
-}
-
-const formatDate = (isoString) => {
-  if (!isoString) return '—'
-  return new Date(isoString).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' })
-}
+const formatPrice = (price) => price ? new Intl.NumberFormat('en-KE').format(price) : '—'
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-KE', { year: 'numeric', month: 'long', day: 'numeric' }) : '—'
 </script>
-
-<style scoped>
-.fade-enter-active { transition: opacity 0.3s ease; }
-.fade-enter-from { opacity: 0; }
-</style>
